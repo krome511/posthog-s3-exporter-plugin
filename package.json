@@ -1,0 +1,19 @@
+{
+    "name": "@krome511/posthog-s3-exporter-plugin",
+    "version": "0.0.4",
+    "description": "Export PostHog events to Amazon S3 on ingestion with configurations.",
+    "scripts": {
+        "test": "jest"
+    },
+    "devDependencies": {
+        "@posthog/plugin-contrib": "^0.0.3",
+        "@posthog/plugin-scaffold": "^1.4.0",
+        "@types/generic-pool": "^3.1.9",
+        "@types/jest": "^28.1.7",
+        "aws-sdk": "^2.885.0",
+        "generic-pool": "^3.7.8",
+        "jest": "^27.0.4",
+        "ts-jest": "^28.0.8",
+        "typescript": "^4.7.4"
+    }
+}
