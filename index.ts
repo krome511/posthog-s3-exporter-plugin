@@ -90,7 +90,7 @@ export const getSettings: S3Plugin['getSettings'] = (_) => {
 }
 
 export const exportEvents: S3Plugin['exportEvents'] = async (events, meta) => {
-    console.log('---------------------  from exportEvents, inside with config.uploadMinutes: --->', meta?.config?.uploadMinutes);
+    // console.log('---------------------  from exportEvents, inside with config.uploadMinutes: --->', meta?.config?.uploadMinutes);
     console.log('---------------------  from exportEvents, inside with global triggerCount: --->', triggerCount);
     triggerCount += 1;
     const eventsToExport = events.filter(event => !meta.global.eventsToIgnore.has(event.event))
