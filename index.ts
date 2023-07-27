@@ -34,6 +34,7 @@ type S3Plugin = Plugin<{
 
 const triggerLimit = 3;
 let triggerCount = 0;
+let eventArr: ProcessedPluginEvent[] = [];
 
 export function convertEventBatchToBuffer(events: ProcessedPluginEvent[]): Buffer {
     return Buffer.from(events.map((event) => JSON.stringify(event)).join('\n'), 'utf8')
@@ -106,7 +107,15 @@ export const exportEvents: S3Plugin['exportEvents'] = async (events, meta) => {
     
     if (currTime >= globalNextTriggerTime) {
         meta.global.nextTriggerTime = new Date(currTime.setMinutes(currTime.getMinutes() + Number(meta.config.uploadMinutes)));
-        await sendBatchToS3(events, meta)
+        events.forEach(event => {
+            eventArr.push(event);
+        });
+        // await sendBatchToS3(events, meta)
+        await sendBatchToS3(eventArr, meta);
+    } else {
+        events.forEach(event => {
+            eventArr.push(event);
+        });
     }
 }
 
@@ -157,6 +166,7 @@ export const sendBatchToS3 = async (events: ProcessedPluginEvent[], meta: Plugin
                 return reject(new RetryError())
             }
             console.log(`Uploaded ${events.length} event${events.length === 1 ? '' : 's'} to bucket ${config.s3BucketName}`)
+            eventArr = [];
             resolve()
         })
     })
