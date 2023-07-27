@@ -26,8 +26,10 @@ type S3Plugin = Plugin<{
     global: {
         s3: S3
         eventsToIgnore: Set<string>
+        nextTriggerTime: Date
     }
     config: PluginConfig
+    // nextTriggerTime: Date
 }>
 
 const triggerLimit = 3;
@@ -81,6 +83,8 @@ export const setupPlugin: S3Plugin['setupPlugin'] = (meta) => {
     global.eventsToIgnore = new Set(
         config.eventsToIgnore ? config.eventsToIgnore.split(',').map((event) => event.trim()) : null
     )
+
+    global.nextTriggerTime = new Date();
 }
 
 export const getSettings: S3Plugin['getSettings'] = (_) => {
@@ -90,14 +94,27 @@ export const getSettings: S3Plugin['getSettings'] = (_) => {
 }
 
 export const exportEvents: S3Plugin['exportEvents'] = async (events, meta) => {
+    let currTime = new Date();
+    let globalNextTriggerTime = meta.global.nextTriggerTime;
     // console.log('---------------------  from exportEvents, inside with config.uploadMinutes: --->', meta?.config?.uploadMinutes);
-    console.log('---------------------  from exportEvents, inside with global triggerCount: --->', triggerCount);
-    triggerCount += 1;
+    console.log('---------------------  from exportEvents, inside with global nextTriggerTime: --->', globalNextTriggerTime);
+    console.log('---------------------  from exportEvents, currTime: --->', currTime);
+    // triggerCount += 1;
     const eventsToExport = events.filter(event => !meta.global.eventsToIgnore.has(event.event))
-    if (triggerCount <= triggerLimit) {
+    
+    
+    
+    if (currTime >= globalNextTriggerTime) {
+        meta.global.nextTriggerTime = new Date(currTime.setMinutes(currTime.getMinutes() + Number(meta.config.uploadMinutes)));
         await sendBatchToS3(events, meta)
     }
 }
+
+// export const getNextTriggerTime: Date = (currTime: Date, incr: number) => {
+//     return new Date(currTime.setMinutes(currTime.getMinutes() + incr));
+// }
+
+
 
 export const sendBatchToS3 = async (events: ProcessedPluginEvent[], meta: PluginMeta<S3Plugin>) => {
     const { global, config } = meta
